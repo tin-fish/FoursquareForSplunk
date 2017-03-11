@@ -11,9 +11,26 @@ formatter = logging.Formatter('%(levelname)s %(message)s')
 handler = logging.StreamHandler(stream=sys.stderr)
 handler.setFormatter(formatter)
 logging.root.addHandler(handler)
+def splunkSquare(pkey,key,val,result):
+	if pkey != "":
+		pkey=pkey+"_"
+	if pkey=="" and key=="createdAt":
+		x=0
+	elif type(val) is unicode:
+		result=result+","+pkey+key+"=\""+val.encode('utf8', 'replace')+"\""
+	elif type(val) in [bool,int,float]:
+		result=result+","+pkey+key+"=\""+str(val)+"\""
+	elif type(val) is dict:
+		for subkey in val.keys():
+			result=splunkSquare(pkey+key,subkey,val[subkey],result)
+	elif type(val) is list:
+		c=0
+		for subval in val:
+			result=splunkSquare(pkey+key,str(c),subval,result)
+			c=c+1
+	return result
 def retrievecheckin(startPoint,token):
 	logging.info("Running retrievecheckin function")
-	result=""
 	finishPoint=startPoint
 	logging.info("Working startpoint of "+str(startPoint))
 	url="https://api.foursquare.com/v2/users/self/checkins?oauth_token="+token+"&v=20160509&afterTimestamp="+str(startPoint)+"&limit=250&sort=oldestfirst"
@@ -22,42 +39,12 @@ def retrievecheckin(startPoint,token):
 	logging.info("Foursquare totes responded!!!")
 	for checkin in data["response"]["checkins"]["items"]:
 		Time=checkin["createdAt"]
+		result=str(Time)+",datatype=\"checkin\""
+		for key in checkin.keys():
+			result = splunkSquare("",key,checkin[key],result)
+		print result
 		finishPoint=Time
-		TimeFull=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(Time))
-		Name=checkin["venue"]["name"]
-		Name=Name.encode('utf8', 'replace')
-		Long=""
-		Lati=""
-		City=""
-		Ctry=""
-		for key in checkin["venue"]["location"].keys():
-			if key=="lng":
-				Long=checkin["venue"]["location"][key]
-			elif key=="lat":
-				Lati=checkin["venue"]["location"][key]
-			elif key=="city":
-				City=checkin["venue"]["location"][key]
-			elif key=="country":
-				Ctry=checkin["venue"]["location"][key]
-		if len(checkin["venue"]["categories"])>0:	
-			Catg=checkin["venue"]["categories"][0]["name"]
-		else:
-			Catg=""
-		City=City.encode('utf8', 'replace')
-		Catg=Catg.encode('utf8', 'replace')
-		Boss=checkin["isMayor"]
-		With=checkin["source"]["name"]
-		result=result+str(Time)+","
-		result=result+"Name=\""+str(Name)+"\","
-		result=result+"Long=\""+str(Long)+"\","
-		result=result+"Lati=\""+str(Lati)+"\","
-		result=result+"City=\""+str(City)+"\","
-		result=result+"Country=\""+str(Ctry)+"\","
-		result=result+"Category=\""+str(Catg)+"\","
-		result=result+"Mayor=\""+str(Boss)+"\","
-		result=result+"With=\""+str(With)+"\"\n"
-		logging.info("Checkin:"+result)
-	return(result,finishPoint)
+	return(finishPoint)
 def runFoursquareApp(token):
 	logging.info("Running main body of script")
 	try:
@@ -70,10 +57,9 @@ def runFoursquareApp(token):
 	stop=time.time()
 	while marker<stop:
 		logging.info("Running from marker "+str(marker))
-		(result,pointer)=retrievecheckin(marker,token)
+		(pointer)=retrievecheckin(marker,token)
 		if pointer==marker:break
 		marker=pointer+1
-		print result
 	logging.info("Finishing cycle, writing to dat file")
 	m=open(myRunningDir+'/4sqdata.dat','w')
 	m.write(str(marker))

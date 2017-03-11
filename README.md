@@ -1,4 +1,4 @@
 # FoursquareForSplunk
 My Foursquare App For Splunk
 
-The original iteration of my first app.
+Main update being removal of indexes.conf following responses from appinspect.

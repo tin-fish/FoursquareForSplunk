@@ -5,7 +5,7 @@
     <input type="dropdown" token="FilterCat">
       <label>Select a category for focus</label>
       <populatingSearch fieldForValue="Category" fieldForLabel="Category">
-        <![CDATA[index=foursquareapi sourcetype=foursquaredata | top 20 Category showperc=f showcount=f|uniq]]>
+        <![CDATA[eventtype=checkin sourcetype=foursquaredata | top 20 Category showperc=f showcount=f|uniq]]>
       </populatingSearch>
       <default>*</default>
       <choice value="*">All</choice>
@@ -23,7 +23,7 @@
       <map>
         <title>Countries I've Visited</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Long AS Longitude, Lati AS Latitude, Name AS Location| lookup geo_countries longitude AS Longitude, latitude AS Latitude | dedup featureId | stats COUNT BY featureId | geom geo_countries</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | lookup geo_countries longitude AS Longitude, latitude AS Latitude | dedup featureId | stats COUNT BY featureId | geom geo_countries</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -55,7 +55,7 @@
       <table>
         <title>Today's Trail</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location | table Location, _time</query>
+          <query>eventtype=checkin sourcetype=foursquaredata table Location, _time</query>
           <earliest>@d</earliest>
           <latest>now</latest>
         </search>
@@ -66,7 +66,7 @@
     <panel>
       <single>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | chart COUNT</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | chart COUNT</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -90,7 +90,7 @@
     <panel>
       <single>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | stats dc(Country)</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | stats dc(Country)</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -113,7 +113,7 @@
     <panel>
       <single>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location| search Category="$FilterCat$" | stats dc(Location)</query>
+          <query>eventtype=checkin sourcetype=foursquaredata search Category="$FilterCat$" | stats dc(Location)</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -137,7 +137,7 @@
     <panel>
       <single>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location, Long AS Longitude, Lati AS Latitude | fields Time, Location, Category, City, Country, Boss, Longitude, Latitude, With | chart LATEST(Location)</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | fields Time, Location, Category, City, Country, Boss, Longitude, Latitude, With | chart LATEST(Location)</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -163,7 +163,7 @@
     <panel>
       <map>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location, Long AS Longitude, Lati AS Latitude | geostats count latfield=Latitude longfield=Longitude</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | geostats count latfield=Latitude longfield=Longitude</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -194,7 +194,7 @@
       <chart>
         <title>Top Location</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location | top Location</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | top Location</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -227,7 +227,7 @@
       <chart>
         <title>Top Categories</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | top Category</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | top Category</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -262,7 +262,7 @@
       <chart>
         <title>Top Places By $FilterCat$</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | rename Name AS Location | search Category = "$FilterCat$" | TOP Location</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | search Category = "$FilterCat$" | TOP Location</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -295,7 +295,7 @@
       <chart>
         <title>Checkin Device</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | CHART COUNT BY With</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | CHART COUNT BY With</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
@@ -330,7 +330,7 @@
       <chart>
         <title>Device Usage</title>
         <search>
-          <query>index=foursquareapi sourcetype=foursquaredata | TIMECHART COUNT BY With</query>
+          <query>eventtype=checkin sourcetype=foursquaredata | TIMECHART COUNT BY With</query>
           <earliest>$time_tok.earliest$</earliest>
           <latest>$time_tok.latest$</latest>
         </search>
